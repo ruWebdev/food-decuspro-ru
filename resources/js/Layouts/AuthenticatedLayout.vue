@@ -37,7 +37,37 @@ const showingNavigationDropdown = ref(false);
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
                                 >
-                                    Dashboard
+                                    {{ __('Панель управления') }}
+                                </NavLink>
+                                <NavLink
+                                    :href="route('recipes.index')"
+                                    :active="route().current('recipes.index')"
+                                >
+                                    {{ __('Рецепты') }}
+                                </NavLink>
+                                <NavLink
+                                    :href="route('news.index')"
+                                    :active="route().current('news.index')"
+                                >
+                                    {{ __('Новости') }}
+                                </NavLink>
+                                <NavLink
+                                    :href="route('ratings.index')"
+                                    :active="route().current('ratings.index')"
+                                >
+                                    {{ __('Система рейтингов') }}
+                                </NavLink>
+                                <NavLink
+                                    :href="route('account.index')"
+                                    :active="route().current('account.index')"
+                                >
+                                    {{ __('Личный кабинет') }}
+                                </NavLink>
+                                <NavLink
+                                    :href="route('settings.index')"
+                                    :active="route().current('settings.index')"
+                                >
+                                    {{ __('Настройки') }}
                                 </NavLink>
                             </div>
                         </div>
@@ -144,7 +174,37 @@ const showingNavigationDropdown = ref(false);
                             :href="route('dashboard')"
                             :active="route().current('dashboard')"
                         >
-                            Dashboard
+                            {{ __('Панель управления') }}
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('recipes.index')"
+                            :active="route().current('recipes.index')"
+                        >
+                            {{ __('Рецепты') }}
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('news.index')"
+                            :active="route().current('news.index')"
+                        >
+                            {{ __('Новости') }}
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('ratings.index')"
+                            :active="route().current('ratings.index')"
+                        >
+                            {{ __('Система рейтингов') }}
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('account.index')"
+                            :active="route().current('account.index')"
+                        >
+                            {{ __('Личный кабинет') }}
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('settings.index')"
+                            :active="route().current('settings.index')"
+                        >
+                            {{ __('Настройки') }}
                         </ResponsiveNavLink>
                     </div>
 
