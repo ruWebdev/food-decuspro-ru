@@ -53,6 +53,20 @@
     </div>
 
     <div id="map" style="height:500px; border:1px solid #ddd" class="rounded"></div>
+
+    <div v-if="result" class="mt-4 p-3 border rounded bg-gray-50">
+      <div class="font-medium mb-2">Подробный расчет</div>
+      <ul class="list-disc ml-6">
+        <li v-for="(row, i) in result.breakdown" :key="i">
+          {{ row.label }} — {{ formatRub(row.amount) }}
+        </li>
+      </ul>
+      <div class="mt-2 text-sm text-gray-700">
+        Длина маршрута: {{ result.distanceKm.toFixed(2) }} км
+        · За МКАД: {{ result.maxOutsideMKAD.toFixed(2) }} км
+      </div>
+      <div class="mt-2 text-lg"><strong>Итого: {{ formatRub(result.totalCost) }}</strong></div>
+    </div>
   </div>
 </template>
 
@@ -95,6 +109,101 @@ function loadYandex() {
 
 function formatRub(v) { return new Intl.NumberFormat('ru-RU').format(Math.round(v)) + ' ₽' }
 
+// Контур МКАД: координаты каждого километра (lon, lat). Преобразуем в [lat, lon]
+const mkadKm = [
+  [1,37.842762,55.774558],[2,37.842789,55.76522],[3,37.842627,55.755723],[4,37.841828,55.747399],
+  [5,37.841217,55.739103],[6,37.840175,55.730482],[7,37.83916,55.721939],[8,37.837121,55.712203],
+  [9,37.83262,55.703048],[10,37.829512,55.694287],[11,37.831353,55.68529],[12,37.834605,55.675945],
+  [13,37.837597,55.667752],[14,37.839348,55.658667],[15,37.833842,55.650053],[16,37.824787,55.643713],
+  [17,37.814564,55.637347],[18,37.802473,55.62913],[19,37.794235,55.623758],[20,37.781928,55.617713],
+  [21,37.771139,55.611755],[22,37.758725,55.604956],[23,37.747945,55.599677],[24,37.734785,55.594143],
+  [25,37.723062,55.589234],[26,37.709425,55.583983],[27,37.696256,55.578834],[28,37.683167,55.574019],
+  [29,37.668911,55.571999],[30,37.647765,55.573093],[31,37.633419,55.573928],[32,37.616719,55.574732],
+  [33,37.60107,55.575816],[34,37.586536,55.5778],[35,37.571938,55.581271],[36,37.555732,55.585143],
+  [37,37.545132,55.587509],[38,37.526366,55.5922],[39,37.516108,55.594728],[40,37.502274,55.60249],
+  [41,37.49391,55.609685],[42,37.484846,55.617424],[43,37.474668,55.625801],[44,37.469925,55.630207],
+  [45,37.456864,55.641041],[46,37.448195,55.648794],[47,37.441125,55.654675],[48,37.434424,55.660424],
+  [49,37.42598,55.670701],[50,37.418712,55.67994],[51,37.414868,55.686873],[52,37.407528,55.695697],
+  [53,37.397952,55.702805],[54,37.388969,55.709657],[55,37.383283,55.718273],[56,37.378369,55.728581],
+  [57,37.374991,55.735201],[58,37.370248,55.744789],[59,37.369188,55.75435],[60,37.369053,55.762936],
+  [61,37.369619,55.771444],[62,37.369853,55.779722],[63,37.372943,55.789542],[64,37.379824,55.79723],
+  [65,37.386876,55.805796],[66,37.390397,55.814629],[67,37.393236,55.823606],[68,37.395275,55.83251],
+  [69,37.394709,55.840376],[70,37.393056,55.850141],[71,37.397314,55.858801],[72,37.405588,55.867051],
+  [73,37.416601,55.872703],[74,37.429429,55.877041],[75,37.443596,55.881091],[76,37.459065,55.882828],
+  [77,37.473096,55.884625],[78,37.48861,55.888897],[79,37.5016,55.894232],[80,37.513206,55.899578],
+  [81,37.527597,55.90526],[82,37.543443,55.907687],[83,37.559577,55.909388],[84,37.575531,55.910907],
+  [85,37.590344,55.909257],[86,37.604637,55.905472],[87,37.619603,55.901637],[88,37.635961,55.898533],
+  [89,37.647648,55.896973],[90,37.667878,55.895449],[91,37.681721,55.894868],[92,37.698807,55.893884],
+  [93,37.712363,55.889094],[94,37.723636,55.883555],[95,37.735791,55.877501],[96,37.741261,55.874698],
+  [97,37.764519,55.862464],[98,37.765992,55.861979],[99,37.788216,55.850257],[100,37.788522,55.850383],
+  [101,37.800586,55.844167],[102,37.822819,55.832707],[103,37.829754,55.828789],[104,37.837148,55.821072],
+  [105,37.838926,55.811599],[106,37.840004,55.802781],[107,37.840965,55.793991],[108,37.841576,55.785017]
+]
+const MKAD_POLYGON = mkadKm.map(([, lon, lat]) => [lat, lon])
+
+function pointInPolygon(lat, lon, polygon) {
+  let inside = false
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i][0], yi = polygon[i][1]
+    const xj = polygon[j][0], yj = polygon[j][1]
+    const intersect = ((yi > lon) !== (yj > lon)) && (lat < (xj - xi) * (lon - yi) / (yj - yi + 1e-12) + xi)
+    if (intersect) inside = !inside
+  }
+  return inside
+}
+
+function geodistance(a, b) {
+  if (window.ymaps && ymaps.coordSystem && ymaps.coordSystem.geo) {
+    return ymaps.coordSystem.geo.getDistance(a, b)
+  }
+  const toRad = d => d * Math.PI / 180
+  const R = 6371000
+  const dLat = toRad(b[0] - a[0])
+  const dLon = toRad(b[1] - a[1])
+  const lat1 = toRad(a[0])
+  const lat2 = toRad(b[0])
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(x))
+}
+
+function segmentOutsideLength(a, b) {
+  const aIn = pointInPolygon(a[0], a[1], MKAD_POLYGON)
+  const bIn = pointInPolygon(b[0], b[1], MKAD_POLYGON)
+  if (aIn && bIn) return 0
+  if (!aIn && !bIn) return geodistance(a, b)
+  // один внутри, другой снаружи — найдём границу бинарным поиском
+  let lo = 0, hi = 1
+  const lerp = (t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
+  for (let k = 0; k < 24; k++) {
+    const mid = (lo + hi) / 2
+    const m = lerp(mid)
+    const mIn = pointInPolygon(m[0], m[1], MKAD_POLYGON)
+    if (aIn !== mIn) hi = mid; else lo = mid
+  }
+  const boundary = lerp(hi)
+  return aIn ? geodistance(boundary, b) : geodistance(a, boundary)
+}
+
+function outsideKmFromRoute(route) {
+  let outsideMeters = 0
+  try {
+    const paths = route.getPaths?.().toArray?.() || []
+    for (const path of paths) {
+      const segments = path.getSegments?.() || []
+      for (const seg of segments) {
+        const coords = seg.geometry?.getCoordinates?.() || []
+        for (let i = 1; i < coords.length; i++) {
+          const a = coords[i - 1]
+          const b = coords[i]
+          // coords приходят как [lat, lon]
+          outsideMeters += segmentOutsideLength([a[0], a[1]], [b[0], b[1]])
+        }
+      }
+    }
+  } catch (e) { /* noop */ }
+  return outsideMeters / 1000
+}
+
 async function calculateRoute() {
   if (!ymapsLoaded.value) return alert('Загрузите API Яндекс.Карт')
   loading.value = true; result.value = null
@@ -116,46 +225,60 @@ async function calculateRoute() {
 
     map.geoObjects.add(route); currentRoute = route
 
-    // получение длины и времени безопасно через свойства
+    // общая длина и время
     let lengthMeters = 0, timeSec = 0
     try {
       const props = route.properties.getAll() || {}
       lengthMeters = props.distance?.value || route.getLength?.() || 0
       timeSec = props.duration?.value || route.getTime?.() || 0
     } catch (e) { lengthMeters = route.getLength?.() || 0 }
-
     const distanceKm = lengthMeters / 1000
 
-    // безопасный обход координат маршрута
-    const mkadCenter = [55.751244, 37.618423], mkadRadius = 16.5
-    let maxOutsideMKAD = 0
-    try {
-      if (route.getPaths) {
-        for (const path of route.getPaths().toArray()) {
-          const segments = path.getSegments?.() || []
-          for (const seg of segments) {
-            const coords = seg.geometry?.getCoordinates?.() || []
-            for (const c of coords) {
-              const dist = ymaps.coordSystem.geo.getDistance(c, mkadCenter) / 1000
-              const outside = dist - mkadRadius
-              if (outside > maxOutsideMKAD) maxOutsideMKAD = outside
-            }
-          }
-        }
-      }
-    } catch (e) { console.warn('Ошибка анализа геометрии', e) }
+    // длина маршрута за МКАД
+    const outsideKm = outsideKmFromRoute(route)
 
+    // тарификация по ТЗ с подробным разбором
     const t = selectedTruck.value
-    let total = t.minOrder
+    const breakdown = []
+    let total = 0
+
+    // База
+    total += t.minOrder
+    breakdown.push({ label: 'База (минимальный заказ)', amount: t.minOrder })
+
+    // Доп. точки выгрузки
     const included = t.id === 't1' ? 6 : t.id === 't3' ? 2 : t.id === 't4_8' ? 2 : t.id === 't8_8' ? 1 : 1
     const extraPts = Math.max(0, unloadPoints.value - included)
-    if (extraPts > 0) total += extraPts * t.extraPointCost
-    const overKm = Math.max(0, distanceKm - t.maxRouteKm)
-    if (overKm > 0) total += overKm * t.rubPerKm
-    if (maxOutsideMKAD > 20) total += (maxOutsideMKAD - 20) * t.rubPerKmMKAD
-    if (extraHours.value > 0) total += extraHours.value * t.hourlyRate
+    const extraPtsAdd = extraPts * t.extraPointCost
+    if (extraPts > 0) breakdown.push({ label: `Доп. точки (${extraPts} × ${formatRub(t.extraPointCost)})`, amount: extraPtsAdd }), total += extraPtsAdd
 
-    result.value = { distanceKm, maxOutsideMKAD, totalCost: total }
+    // Доп. км сверх включённых
+    const overKm = Math.max(0, distanceKm - t.maxRouteKm)
+    const overKmAdd = overKm * t.rubPerKm
+    if (overKm > 0) breakdown.push({ label: `Доп. км (${overKm.toFixed(2)} × ${formatRub(t.rubPerKm)})`, amount: overKmAdd }), total += overKmAdd
+
+    // Удаление от МКАД по правилам
+    let outsideLabel = '≤10 км — без доплаты'
+    let outsideAdd = 0
+    if (outsideKm <= 10) {
+      outsideLabel = '≤10 км — без доплаты'
+      outsideAdd = 0
+    } else if (outsideKm <= 20) {
+      outsideLabel = '10–20 км — +1 час'
+      outsideAdd = t.hourlyRate
+    } else {
+      const billable = outsideKm - 20
+      outsideLabel = `>20 км — ${billable.toFixed(2)} км × ${formatRub(t.rubPerKmMKAD)}`
+      outsideAdd = billable * t.rubPerKmMKAD
+    }
+    if (outsideAdd > 0) breakdown.push({ label: `Удаление от МКАД: ${outsideLabel}`, amount: outsideAdd }), total += outsideAdd
+    else breakdown.push({ label: `Удаление от МКАД: ${outsideLabel}`, amount: 0 })
+
+    // Переработка часов
+    const extraHoursAdd = (extraHours.value > 0) ? extraHours.value * t.hourlyRate : 0
+    if (extraHoursAdd > 0) breakdown.push({ label: `Переработка (${extraHours.value} × ${formatRub(t.hourlyRate)})`, amount: extraHoursAdd }), total += extraHoursAdd
+
+    result.value = { distanceKm, maxOutsideMKAD: outsideKm, totalCost: total, breakdown }
   } catch (e) {
     console.error('Ошибка маршрута', e)
   } finally { loading.value = false }
