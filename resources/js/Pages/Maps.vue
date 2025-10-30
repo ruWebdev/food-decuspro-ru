@@ -14,8 +14,7 @@
     </div>
 
     <div class="mb-4">
-      <label class="block font-medium mb-1">Точки маршрута (минимум 2). Поддерживается несколько точек — нажимайте
-        «Добавить точку»</label>
+      <label class="block font-medium mb-1">Точки маршрута (минимум 2)</label>
       <div v-for="(pt, idx) in points" :key="idx" class="flex gap-2 items-center mb-2">
         <input v-model="pt.address" :placeholder="`Адрес ${idx + 1}`" class="flex-1 p-2 border rounded" />
         <button @click="removePoint(idx)" class="px-2 py-1 border rounded">Удалить</button>
@@ -25,7 +24,7 @@
 
     <div class="mb-4">
       <label class="block font-medium mb-1">Грузовик</label>
-      <select v-model="selectedTruck" class="p-2 border rounded">
+      <select v-model="selectedTruck" class="p-2 border rounded" style="width: 200px;">
         <option v-for="t in trucks" :key="t.id" :value="t">{{ t.label }}</option>
       </select>
     </div>
@@ -37,7 +36,7 @@
       </div>
 
       <div>
-        <label class="block font-medium mb-1">Часы переработки (если есть)</label>
+        <label class="block font-medium mb-1">Часы переработки</label>
         <input type="number" v-model.number="extraHours" min="0" class="p-2 border rounded w-32" />
       </div>
 
@@ -49,210 +48,118 @@
 
     <div v-if="result" class="mb-4 p-3 border rounded bg-gray-50">
       <div><strong>Расстояние маршрута:</strong> {{ result.distanceKm.toFixed(2) }} км</div>
-      <div><strong>Удаление от МКАД (максимум):</strong> {{ result.maxOutsideMKAD.toFixed(2) }} км</div>
-      <div><strong>Время в пути (ч):</strong> {{ (result.timeSec / 3600).toFixed(2) }}</div>
-      <div><strong>Подсчёт стоимости:</strong></div>
-      <ul class="list-disc ml-6">
-        <li>Базовый (минимальный заказ): {{ formatRub(selectedTruck.minOrder) }}</li>
-        <li v-if="extraPoints > 0">Доп. точки: {{ extraPoints }} × {{ formatRub(selectedTruck.extraPointCost) }} = {{
-          formatRub(extraPoints * selectedTruck.extraPointCost) }}</li>
-        <li v-if="distanceOverKm > 0">Доп. км: {{ distanceOverKm.toFixed(2) }} × {{ formatRub(selectedTruck.rubPerKm) }} =
-          {{ formatRub(distanceOverKm * selectedTruck.rubPerKm) }}</li>
-        <li v-if="result.maxOutsideMKAD > 20">Удаление от МКАД ({{ result.maxOutsideMKAD.toFixed(2) }} км) × {{
-          formatRub(selectedTruck.rubPerKmMKAD) }} = {{ formatRub((result.maxOutsideMKAD - 20) *
-            selectedTruck.rubPerKmMKAD) }}</li>
-        <li v-if="extraHours > 0">Переработка часов: {{ extraHours }} × {{ formatRub(selectedTruck.hourlyRate) }} = {{
-          formatRub(extraHours * selectedTruck.hourlyRate) }}</li>
-      </ul>
-      <div class="mt-2 text-lg"><strong>Итого: {{ formatRub(result.totalCost) }}</strong></div>
+      <div><strong>Удаление от МКАД:</strong> {{ result.maxOutsideMKAD.toFixed(2) }} км</div>
+      <div><strong>Итого:</strong> {{ formatRub(result.totalCost) }}</div>
     </div>
 
     <div id="map" style="height:500px; border:1px solid #ddd" class="rounded"></div>
-
-    <div class="mt-4 text-sm text-gray-600">
-      <p><strong>Диагностика ошибок загрузки/маршрута:</strong></p>
-      <ul class="ml-6 list-disc">
-        <li v-if="lastRouteError">Ошибка маршрута: {{ lastRouteError }}</li>
-        <li v-else>Ошибок маршрута нет.</li>
-      </ul>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 const trucks = [
-  { id: 't1', label: '1.5 т (4 паллет)', minHours: 10, minOrder: 9550, hourlyRate: 955, maxRouteKm: 80, rubPerKm: 33, rubPerKmMKAD: 33, extraPointCost: 955 },
-  { id: 't3', label: '3 т (7 паллет)', minHours: 10, minOrder: 11450, hourlyRate: 1145, maxRouteKm: 70, rubPerKm: 36, rubPerKmMKAD: 36, extraPointCost: 1145 },
-  { id: 't4_8', label: '4.8 т (10 паллет)', minHours: 10, minOrder: 13400, hourlyRate: 1340, maxRouteKm: 70, rubPerKm: 38, rubPerKmMKAD: 38, extraPointCost: 1340 },
-  { id: 't8_8', label: '8.8 т (18 паллет)', minHours: 10, minOrder: 18000, hourlyRate: 1800, maxRouteKm: 70, rubPerKm: 42, rubPerKmMKAD: 42, extraPointCost: 1800 },
-  { id: 't20', label: '20 т (33 паллет)', minHours: 8, minOrder: 26720, hourlyRate: 2100, maxRouteKm: 70, rubPerKm: 48, rubPerKmMKAD: 48, extraPointCost: 3340 }
+  { id: 't1', label: '1.5 т (4 паллет)', minOrder: 9550, hourlyRate: 955, maxRouteKm: 80, rubPerKm: 33, rubPerKmMKAD: 33, extraPointCost: 955 },
+  { id: 't3', label: '3 т (7 паллет)', minOrder: 11450, hourlyRate: 1145, maxRouteKm: 70, rubPerKm: 36, rubPerKmMKAD: 36, extraPointCost: 1145 },
+  { id: 't4_8', label: '4.8 т (10 паллет)', minOrder: 13400, hourlyRate: 1340, maxRouteKm: 70, rubPerKm: 38, rubPerKmMKAD: 38, extraPointCost: 1340 },
+  { id: 't8_8', label: '8.8 т (18 паллет)', minOrder: 18000, hourlyRate: 1800, maxRouteKm: 70, rubPerKm: 42, rubPerKmMKAD: 42, extraPointCost: 1800 },
+  { id: 't20', label: '20 т (33 паллет)', minOrder: 26720, hourlyRate: 2100, maxRouteKm: 70, rubPerKm: 48, rubPerKmMKAD: 48, extraPointCost: 3340 }
 ]
 
 const apiKey = ref('')
 const ymapsLoaded = ref(false)
 const loadError = ref('')
-const lastRouteError = ref('')
 const points = ref([{ address: '' }, { address: '' }])
 const selectedTruck = ref(trucks[0])
 const unloadPoints = ref(1)
 const extraHours = ref(0)
 const loading = ref(false)
 const result = ref(null)
+let map = null, currentRoute = null, scriptEl = null
 
-let scriptEl = null
 function addPoint() { points.value.push({ address: '' }) }
 function removePoint(i) { if (points.value.length > 2) points.value.splice(i, 1) }
 
-function unloadYandex() {
-  // убираем скрипт и состояние
-  if (scriptEl && scriptEl.parentNode) scriptEl.parentNode.removeChild(scriptEl)
-  scriptEl = null
-  if (window.ymaps) { try { delete window.ymaps } catch (e) { } }
-  ymapsLoaded.value = false
-  loadError.value = ''
-}
+function unloadYandex() { if (scriptEl) scriptEl.remove(); delete window.ymaps; ymapsLoaded.value = false; }
 
 function loadYandex() {
-  loadError.value = ''
-  lastRouteError.value = ''
-  if (!apiKey.value) { loadError.value = 'Ключ пустой'; return }
+  if (!apiKey.value) { loadError.value = 'Введите API ключ'; return }
   if (window.ymaps) { ymapsLoaded.value = true; return }
-
-  // если ранее был элемент, удалить
-  if (scriptEl && scriptEl.parentNode) scriptEl.parentNode.removeChild(scriptEl)
-
   scriptEl = document.createElement('script')
   scriptEl.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${encodeURIComponent(apiKey.value)}`
-  scriptEl.async = true
-  scriptEl.defer = true
-  scriptEl.onload = () => {
-    // ymaps может быть не готов мгновенно, используем ready
-    if (window.ymaps && typeof window.ymaps.ready === 'function') {
-      window.ymaps.ready(() => { ymapsLoaded.value = true })
-    } else {
-      // в редких случаях скрипт вернул scriptError — пометим
-      loadError.value = 'Скрипт загружен, но ymaps не доступен.'
-    }
-  }
-  scriptEl.onerror = (e) => {
-    // частая причина: Invalid API key или блокировка
-    loadError.value = 'scriptError'
-    // попытка прочитать сообщение из глобального лог-файла Yandex Maps
-    // но библиотека кидает 'Invalid API key' прямо в консоль при загрузке
-  }
+  scriptEl.onload = () => { if (window.ymaps) ymaps.ready(() => ymapsLoaded.value = true) }
+  scriptEl.onerror = () => { loadError.value = 'Ошибка загрузки API (проверьте ключ или ограничения)' }
   document.head.appendChild(scriptEl)
 }
 
 function formatRub(v) { return new Intl.NumberFormat('ru-RU').format(Math.round(v)) + ' ₽' }
 
-let map = null
-let currentRoute = null
-
 async function calculateRoute() {
-  if (!ymapsLoaded.value) { alert('Сначала загрузите API Яндекс.Карт (проверьте сообщение об ошибке ниже)'); return }
-  loading.value = true
-  result.value = null
-  lastRouteError.value = ''
-
+  if (!ymapsLoaded.value) return alert('Загрузите API Яндекс.Карт')
+  loading.value = true; result.value = null
   try {
-    await waitForYmaps()
+    await new Promise((res, rej) => { let t = 0; const id = setInterval(() => { if (window.ymaps) { clearInterval(id); res() } if ((t += 200) > 1e4) { clearInterval(id); rej('timeout') } }, 200) })
+    const addresses = points.value.map(p => p.address).filter(a => a.trim())
+    if (addresses.length < 2) return alert('Нужно минимум 2 адреса')
 
-    const pointsAddresses = points.value.map(p => p.address).filter(a => a && a.trim().length > 0)
-    if (pointsAddresses.length < 2) { alert('Нужно минимум 2 заполненных адреса'); loading.value = false; return }
+    if (!map) map = new ymaps.Map('map', { center: [55.76, 37.64], zoom: 10 })
+    if (currentRoute) map.geoObjects.remove(currentRoute)
 
-    if (!map) { map = new ymaps.Map('map', { center: [55.76, 37.64], zoom: 10, controls: [] }) }
-    if (currentRoute) { map.geoObjects.remove(currentRoute); currentRoute = null }
+    let route = await ymaps.route(addresses, { routingMode: 'auto' })
 
-    let route
+    // если массив — берём первый элемент
+    if (Array.isArray(route)) route = route[0]
+
+    // безопасная установка границ
+    if (route.getBounds) map.setBounds(route.getBounds(), { checkZoomRange: true, zoomMargin: 20 })
+
+    map.geoObjects.add(route); currentRoute = route
+
+    // получение длины и времени безопасно через свойства
+    let lengthMeters = 0, timeSec = 0
     try {
-      route = await ymaps.route(pointsAddresses, { routingMode: 'auto' })
-    } catch (e) {
-      lastRouteError.value = (e && e.message) ? e.message : JSON.stringify(e)
-      throw e
-    }
+      const props = route.properties.getAll() || {}
+      lengthMeters = props.distance?.value || route.getLength?.() || 0
+      timeSec = props.duration?.value || route.getTime?.() || 0
+    } catch (e) { lengthMeters = route.getLength?.() || 0 }
 
-    currentRoute = route
-    map.geoObjects.add(route)
-    map.setBounds(route.getBounds(), { checkZoomRange: true, zoomMargin: 20 })
-
-    const lengthMeters = route.getLength()
-    const timeSec = route.getTime()
     const distanceKm = lengthMeters / 1000
 
-    // Проверяем удаление от МКАД. Используем центр и приблизительный радиус 16.5 км
-    const mkadCenter = [55.751244, 37.618423]
-    const mkadRadius = 16.5 // km
+    // безопасный обход координат маршрута
+    const mkadCenter = [55.751244, 37.618423], mkadRadius = 16.5
     let maxOutsideMKAD = 0
-
     try {
-      const paths = route.getPaths().toArray()
-      for (const path of paths) {
-        const segments = path.getSegments()
-        for (const seg of segments) {
-          const coords = seg.geometry.getCoordinates()
-          for (const c of coords) {
-            const dist = ymaps.coordSystem.geo.getDistance(c, mkadCenter) / 1000
-            const outside = dist - mkadRadius
-            if (outside > maxOutsideMKAD) maxOutsideMKAD = outside
+      if (route.getPaths) {
+        for (const path of route.getPaths().toArray()) {
+          const segments = path.getSegments?.() || []
+          for (const seg of segments) {
+            const coords = seg.geometry?.getCoordinates?.() || []
+            for (const c of coords) {
+              const dist = ymaps.coordSystem.geo.getDistance(c, mkadCenter) / 1000
+              const outside = dist - mkadRadius
+              if (outside > maxOutsideMKAD) maxOutsideMKAD = outside
+            }
           }
         }
       }
-    } catch (e) {
-      // если геометрия недоступна по какой-то причине — не фатально
-      console.warn('Не удалось полностью пройтись по сегментам маршрута:', e)
-    }
+    } catch (e) { console.warn('Ошибка анализа геометрии', e) }
 
-    const truck = selectedTruck.value
-    let total = truck.minOrder
-    const includedPoints = (truck.id === 't1' ? 6 : truck.id === 't3' ? 2 : truck.id === 't4_8' ? 2 : truck.id === 't8_8' ? 1 : 1)
-    const extraPointsCount = Math.max(0, unloadPoints.value - includedPoints)
-    if (extraPointsCount > 0) total += extraPointsCount * truck.extraPointCost
+    const t = selectedTruck.value
+    let total = t.minOrder
+    const included = t.id === 't1' ? 6 : t.id === 't3' ? 2 : t.id === 't4_8' ? 2 : t.id === 't8_8' ? 1 : 1
+    const extraPts = Math.max(0, unloadPoints.value - included)
+    if (extraPts > 0) total += extraPts * t.extraPointCost
+    const overKm = Math.max(0, distanceKm - t.maxRouteKm)
+    if (overKm > 0) total += overKm * t.rubPerKm
+    if (maxOutsideMKAD > 20) total += (maxOutsideMKAD - 20) * t.rubPerKmMKAD
+    if (extraHours.value > 0) total += extraHours.value * t.hourlyRate
 
-    const distanceOverKm = Math.max(0, distanceKm - truck.maxRouteKm)
-    if (distanceOverKm > 0) total += distanceOverKm * truck.rubPerKm
-
-    // Логика: если максимальное удаление за МКАД более 20 км — платим за (maxOutsideMKAD - 20)
-    if (maxOutsideMKAD > 20) total += (maxOutsideMKAD - 20) * truck.rubPerKmMKAD
-
-    if (extraHours.value > 0) total += extraHours.value * truck.hourlyRate
-
-    result.value = { distanceKm, timeSec, totalCost: total, maxOutsideMKAD }
-
-  } catch (err) {
-    console.error('calculateRoute error', err)
-    if (!lastRouteError.value) lastRouteError.value = (err && err.message) ? err.message : String(err)
-  } finally {
-    loading.value = false
-  }
+    result.value = { distanceKm, maxOutsideMKAD, totalCost: total }
+  } catch (e) {
+    console.error('Ошибка маршрута', e)
+  } finally { loading.value = false }
 }
-
-function waitForYmaps() {
-  return new Promise((resolve, reject) => {
-    const max = 10000
-    let waited = 0
-    const id = setInterval(() => {
-      if (window.ymaps) { clearInterval(id); resolve() }
-      waited += 200
-      if (waited > max) { clearInterval(id); reject(new Error('ymaps load timeout')) }
-    }, 200)
-  })
-}
-
-const distanceOverKm = ref(0)
-const extraPoints = ref(0)
-watch(() => result.value, (r) => {
-  if (r) {
-    const truck = selectedTruck.value
-    distanceOverKm.value = Math.max(0, r.distanceKm - truck.maxRouteKm)
-    const includedPoints = (truck.id === 't1' ? 6 : truck.id === 't3' ? 2 : truck.id === 't4_8' ? 2 : truck.id === 't8_8' ? 1 : 1)
-    extraPoints.value = Math.max(0, unloadPoints.value - includedPoints)
-  } else {
-    distanceOverKm.value = 0
-    extraPoints.value = 0
-  }
-})
 </script>
 
 <style scoped>
