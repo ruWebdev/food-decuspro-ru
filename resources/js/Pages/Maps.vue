@@ -67,7 +67,7 @@ const trucks = [
   { id: 't20', label: '20 т (33 паллет)', minOrder: 26720, hourlyRate: 2100, maxRouteKm: 70, rubPerKm: 48, rubPerKmMKAD: 48, extraPointCost: 3340 }
 ]
 
-const apiKey = ref('')
+const apiKey = ref('3488d80b-a08a-4301-ae5a-617ece4bd5fe')
 const ymapsLoaded = ref(false)
 const loadError = ref('')
 const points = ref([{ address: '' }, { address: '' }])
@@ -103,7 +103,7 @@ async function calculateRoute() {
     const addresses = points.value.map(p => p.address).filter(a => a.trim())
     if (addresses.length < 2) return alert('Нужно минимум 2 адреса')
 
-    if (!map) map = new ymaps.Map('map', { center: [55.76, 37.64], zoom: 10 })
+    if (!map) map = new ymaps.Map('map', { center: [55.76, 37.64], zoom: 8 })
     if (currentRoute) map.geoObjects.remove(currentRoute)
 
     let route = await ymaps.route(addresses, { routingMode: 'auto' })
