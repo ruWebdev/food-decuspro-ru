@@ -9,7 +9,7 @@ class RecipesController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('Recipes', [
+        return Inertia::render('Recipes/Index', [
             'title' => __('Рецепты'),
             'description' => __('Подборка кулинарных рецептов и рекомендаций'),
         ]);
@@ -17,7 +17,7 @@ class RecipesController extends Controller
 
     public function show(string $slug): Response
     {
-        return Inertia::render('Recipe', [
+        return Inertia::render('Recipes/Recipe', [
             'title' => __('Рецепт'),
             'slug' => $slug,
             'description' => __('Детальная страница рецепта'),
@@ -26,7 +26,7 @@ class RecipesController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('RecipeCreate', [
+        return Inertia::render('Recipes/RecipeCreate', [
             'title' => __('Добавить рецепт'),
             'description' => __('Страница добавления нового рецепта'),
         ]);

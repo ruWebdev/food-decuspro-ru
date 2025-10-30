@@ -39,12 +39,11 @@ class PageController extends Controller
         ]);
     }
 
-    public function newsShow(string $slug): Response
+    public function maps(): Response
     {
-        return Inertia::render('NewsShow', [
-            'title' => __('Новость'),
-            'slug' => $slug,
-            'description' => __('Детальная страница новости'),
+        return Inertia::render('Maps', [
+            'title' => __('Карты'),
+            'description' => __('Интерактивная карта'),
         ]);
     }
 }

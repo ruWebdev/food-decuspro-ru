@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ЛОГОТИП — Рецепты</title>
+
+  <!-- Bootstrap 5 + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #A3CB38;
+      --primary-dark: #8ab32e;
+      --text: #333;
+      --gray: #777;
+      --light: #f8f9fa;
+      --border: #e0e0e0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--light);
+      color: var(--text);
+    }
+
+    .logo {
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+    .logo img {
+      width: 32px;
+      height: 32px;
+      margin-right: 8px;
+    }
+
+    .nav-link {
+      color: #555;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+    }
+    .nav-link i {
+      width: 20px;
+      margin-right: 10px;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: rgba(163, 203, 56, 0.1);
+      color: var(--primary);
+    }
+
+    .badge-notif {
+      background: #dc3545;
+      font-size: 0.65rem;
+      padding: 0.25em 0.5em;
+    }
+
+    .recipe-card {
+      background: #fff;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+    .recipe-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .recipe-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .badge-meal {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      font-weight: 500;
+    }
+
+    .difficulty-circle {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .btn-cook {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .btn-cook:hover {
+      background: var(--primary-dark);
+    }
+
+    .stats i {
+      font-size: 0.9rem;
+      margin-right: 4px;
+    }
+
+    .promo-banner {
+      background: linear-gradient(135deg, #f39c12, #e67e22);
+      color: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    .promo-banner img {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 1rem;
+    }
+
+    .btn-claim {
+      background: white;
+      color: #e67e22;
+      font-weight: bold;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    /* Мобильное меню */
+    @media (max-width: 992px) {
+      .sidebar-left {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        height: 100vh;
+        background: white;
+        z-index: 1050;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        padding-top: 1rem;
+        overflow-y: auto;
+      }
+      .sidebar-left.show { left: 0; }
+      .main-content { margin-left: 0 !important; }
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1040;
+    }
+    .overlay.show { display: block; }
+
+    @media (min-width: 993px) {
+      .mobile-header, .navbar-toggler { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid p-0">
+  <div class="row g-0">
+
+    <!-- Левая колонка (20%) -->
+    <div class="col-lg-2 sidebar-left d-lg-block" id="sidebarLeft">
+      <div class="p-3">
+
+        <!-- Логотип -->
+        <div class="d-flex align-items-center mb-4">
+          <img src="https://via.placeholder.com/32x32/000/FFF?text=L" alt="Logo">
+          <span class="logo">ЛОГОТИП</span>
+        </div>
+
+        <!-- Навигация -->
+        <nav class="nav flex-column mb-4">
+          <a href="#" class="nav-link active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+          <a href="#" class="nav-link"><i class="bi bi-calendar3"></i> Calendar</a>
+          <a href="#" class="nav-link">
+            <i class="bi bi-chat-dots"></i> Messages
+            <span class="badge bg-danger ms-auto badge-notif">100</span>
+          </a>
+          <a href="#" class="nav-link"><i class="bi bi-journal-text"></i> Healthy Menu</a>
+          <a href="#" class="nav-link"><i class="bi bi-list-check"></i> Meal Plan</a>
+          <a href="#" class="nav-link"><i class="bi bi-book"></i> Food Diary</a>
+          <a href="#" class="nav-link"><i class="bi bi-graph-up"></i> Progress</a>
+          <a href="#" class="nav-link"><i class="bi bi-dumbbell"></i> Exercises</a>
+          <a href="#" class="nav-link"><i class="bi bi-lightbulb"></i> Health Insights</a>
+        </nav>
+
+        <!-- Рекламный блок -->
+        <div class="promo-banner mb-4">
+          <img src="https://via.placeholder.com/80x80/FFF/000?text=Promo" alt="Promo">
+          <div><strong>Start your health journey with a FREE 1-month access to NutriGo!</strong></div>
+          <button class="btn btn-claim mt-2">Claim Now!</button>
+        </div>
+
+        <!-- Кнопка выхода -->
+        <div class="text-center">
+          <a href="#" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-box-arrow-right"></i> Выйти
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Центральная колонка (80%) -->
+    <div class="col-lg-10 main-content" style="min-height: 100vh;">
+
+      <!-- Мобильный хедер -->
+      <header class="mobile-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center d-lg-none">
+        <button class="navbar-toggler border-0 p-2" id="toggleSidebar">
+          <i class="bi bi-list fs-3"></i>
+        </button>
+        <span class="logo fs-5">ЛОГОТИП</span>
+        <div></div>
+      </header>
+
+      <!-- Основное содержимое -->
+      <main class="p-3 p-lg-4">
+
+        <!-- Заголовок + кнопка -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="mb-0">Рецепты</h2>
+          <button class="btn btn-success d-none d-md-block">Добавить рецепт</button>
+        </div>
+
+        <p class="text-muted mb-4">Все меню</p>
+
+        <!-- Фильтры -->
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-4">
+          <button class="btn btn-success btn-sm">Все</button>
+          <button class="btn btn-outline-secondary btn-sm">Завтрак</button>
+          <button class="btn btn-outline-secondary btn-sm">Обед</button>
+          <button class="btn btn-outline-secondary btn-sm">Полдник</button>
+          <button class="btn btn-outline-secondary btn-sm">Ужин</button>
+          <button class="btn btn-outline-secondary btn-sm">Правильное питание</button>
+
+          <div class="ms-auto d-flex align-items-center gap-2">
+            <span class="text-muted small">Сортировать по:</span>
+            <select class="form-select form-select-sm" style="width: auto;">
+              <option>Калории</option>
+              <option>Популярность</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Список рецептов -->
+        <div class="row g-3">
+
+          <!-- Рецепт 1 -->
+          <div class="col-12">
+            <div class="recipe-card">
+              <div class="row g-0 align-items-center">
+                <div class="col-md-4">
+                  <img src="https://via.placeholder.com/400x250/C0C0C0/FFF?text=Тост+с+авокадо" class="recipe-img" alt="Тост">
+                </div>
+                <div class="col-md-8 p-3 p-md-4">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">Тост с авокадо и яйцом-пашот</h5>
+                    <button class="btn btn-cook btn-sm">Готовить</button>
+                  </div>
+                  <div class="d-flex gap-3 mb-2">
+                    <span class="badge bg-success badge-meal">Завтрак</span>
+                    <span class="text-success"><span class="difficulty-circle bg-success"></span> Легко</span>
+                  </div>
+                  <div class="text-warning mb-2">Оценка: 5/5 <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+                  <div class="d-flex gap-4 text-muted stats">
+                    <span><i class="bi bi-fire"></i> 320 ккал</span>
+                    <span><i class="bi bi-clock"></i> 30г углеводы</span>
+                    <span><i class="bi bi-droplet"></i> 14г белок</span>
+                    <span><i class="bi bi-heart"></i> 18г жиры</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Рецепт 2 -->
+          <div class="col-12">
+            <div class="recipe-card">
+              <div class="row g-0 align-items-center">
+                <div class="col-md-4">
+                  <img src="https://via.placeholder.com/400x250/C0C0C0/FFF?text=Тако+с+креветками" class="recipe-img" alt="Тако">
+                </div>
+                <div class="col-md-8 p-3 p-md-4">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">Тако с креветками на гриле и сальсой из манго</h5>
+                    <button class="btn btn-cook btn-sm">Готовить</button>
+                  </div>
+                  <div class="d-flex gap-3 mb-2">
+                    <span class="badge bg-warning text-dark badge-meal">Обед</span>
+                    <span class="text-warning"><span class="difficulty-circle bg-warning"></span> Средний</span>
+                  </div>
+                  <div class="text-warning mb-2">Оценка: 3/5 <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i><i class="bi bi-star"></i></div>
+                  <div class="d-flex gap-4 text-muted stats">
+                    <span><i class="bi bi-fire"></i> 400 ккал</span>
+                    <span><i class="bi bi-clock"></i> 45г углеводы</span>
+                    <span><i class="bi bi-droplet"></i> 28г белок</span>
+                    <span><i class="bi bi-heart"></i> 12г жиры</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+
+  </div>
+</div>
+
+<!-- Overlay для мобильного меню -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const toggleBtn = document.getElementById('toggleSidebar');
+  const sidebar = document.getElementById('sidebarLeft');
+  const overlay = document.getElementById('overlay');
+
+  toggleBtn?.addEventListener('click', () => {
+    sidebar.classList.toggle('show');
+    overlay.classList.toggle('show');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('show');
+    overlay.classList.remove('show');
+  });
+
+  // Закрытие по клику на пункт
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 992) {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/ratings', [PageController::class, 'ratingSystem'])->name('ratings.index');
     Route::get('/account', [PageController::class, 'account'])->name('account.index');
     Route::get('/settings', [PageController::class, 'settings'])->name('settings.index');
+    Route::get('/maps', [PageController::class, 'maps'])->name('maps.index');
 });
 
 Route::middleware('auth')->group(function () {

@@ -1,45 +1,45 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+ import { Link } from '@inertiajs/vue3'
+ const props = defineProps({
+   open: { type: Boolean, default: false }
+ })
 </script>
 
 <template>
-  <section class="sidebar col-12 col-lg-2">
-    <div class="sidebar-blok-up">
-      <Link class="logo-link" :href="route('recipes.index')"><img src="/img/Logo.png" alt="logo" /></Link>
-      <ul class="sidebar-menu">
-        <li>
-          <Link :href="route('recipes.index')" class="sidebar-menu-link sidebar-menu-link-1">
-            <img class="icon" src="/img/icon-menu.svg" width="22" height="22" alt="Recipes" />Рецепты
-          </Link>
-        </li>
-        <li>
-          <Link :href="route('news.index')" class="sidebar-menu-link sidebar-menu-link-2">
-            <img class="icon" src="/img/icon-messages.svg" width="22" height="22" alt="News" />Новости
-          </Link>
-        </li>
-        <li>
-          <Link :href="route('ratings.index')" class="sidebar-menu-link sidebar-menu-link-7">
-            <img class="icon" src="/img/icon-progress.svg" width="22" height="22" alt="Ratings" />Рейтинги
-          </Link>
-        </li>
-        <li>
-          <Link :href="route('account.index')" class="sidebar-menu-link sidebar-menu-link-4">
-            <img class="icon" src="/img/icon-user.png" width="22" height="22" alt="Account" />Профиль
-          </Link>
-        </li>
-      </ul>
-    </div>
-    <div class="sidebar-blok-down">
-      <div class="sidebar-blok-down-image">
-        <img src="/img/cabinet-Image-1.png" alt="menu" />
-        <p class="blok-down-image-text-1">Start your health journey with a <b>FREE 1-month</b> access to Nutrigo!</p>
-        <p class="blok-down-image-text-2">Claim Now!</p>
+  <div class="col-lg-2 sidebar-left d-lg-block" :class="{ show: props.open }">
+    <div class="p-3">
+      <!-- Логотип -->
+      <div class="d-flex align-items-center mb-4">
+        <img src="https://via.placeholder.com/32x32/000/FFF?text=🍊" alt="Logo">
+        <span class="logo">{{ __('ЛОГОТИП') }}</span>
       </div>
-      <li>
-        <Link :href="route('logout')" method="post" as="button" class="sidebar-menu-link sidebar-menu-link-10">
-          <img class="icon" src="/img/icon-exit.svg" width="22" height="22" alt="Exit" />Выйти
-        </Link>
-      </li>
+
+      <!-- Навигация -->
+      <nav class="nav flex-column mb-4">
+        <Link :href="route('dashboard')" class="nav-link active"><i class="bi bi-speedometer2"></i> {{ __('Панель') }}</Link>
+        <Link href="#" class="nav-link"><i class="bi bi-calendar3"></i> {{ __('Календарь') }}</Link>
+        <Link href="#" class="nav-link"><i class="bi bi-chat-dots"></i> {{ __('Сообщения') }} <span class="badge bg-danger ms-1">100</span></Link>
+        <Link href="#" class="nav-link"><i class="bi bi-journal-text"></i> {{ __('Полезное меню') }}</Link>
+        <Link href="#" class="nav-link"><i class="bi bi-list-check"></i> {{ __('План питания') }}</Link>
+        <Link href="#" class="nav-link"><i class="bi bi-book"></i> {{ __('Дневник питания') }}</Link>
+        <Link href="#" class="nav-link"><i class="bi bi-graph-up"></i> {{ __('Прогресс') }}</Link>
+        <Link href="#" class="nav-link"><i class="bi bi-dumbbell"></i> {{ __('Упражнения') }}</Link>
+        <Link href="#" class="nav-link"><i class="bi bi-lightbulb"></i> {{ __('Здоровье') }}</Link>
+      </nav>
+
+      <!-- Рекламный блок -->
+      <div class="promo-banner mb-4">
+        <div class="d-flex justify-content-center mb-3">
+          <img src="https://via.placeholder.com/80x80/FFF/000?text=🥗" alt="Promo">
+        </div>
+        <h5>{{ __('Начните свой путь к здоровью с БЕСПЛАТНЫМ доступом на 1 месяц!') }}</h5>
+        <button class="btn btn-light btn-sm mt-2">{{ __('Получить') }}</button>
+      </div>
+
+      <!-- Кнопка выхода -->
+      <div class="text-center">
+        <Link :href="route('logout')" method="post" as="button" class="btn btn-outline-secondary w-100"><i class="bi bi-box-arrow-right"></i> {{ __('Выйти') }}</Link>
+      </div>
     </div>
-  </section>
+  </div>
 </template>
